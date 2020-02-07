@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="19.11.0.0">
+<procedure name="main">
+<interface/>
+<body>
+<c>*===（1）===</c>
+<c>* </c>
+<c>* *********************************</c>
+<c>* **   Set Input/Output paths   ***</c>
+<c>* *********************************</c>
+<c>* </c>
+<c>* Get the path to the examples.</c>
+<l>get_system ('example_dir', PathExample)</l>
+<c>* Folder with ground truth classification image data.</c>
+<l>RawImageBaseFolder := PathExample + '/images/pill/'</l>
+<c>* </c>
+<c>* All example data is written to this folder.</c>
+<l>ExampleDataDir := 'classify_pill_defects_data'</l>
+<c>* Dataset directory basename for any outputs written by preprocess_dl_dataset.</c>
+<l>DataDirectoryBaseName := ExampleDataDir + '/dldataset_pill'</l>
+<c>* </c>
+<c>* *************************</c>
+<c>* **   Set parameters   ***</c>
+<c>* *************************</c>
+<c>* </c>
+<c>* LabelSource for reading in the dataset.</c>
+<l>LabelSource := 'last_folder'</l>
+<c>* </c>
+<c>* Percentages for splitting the dataset.</c>
+<l>TrainingPercent := 70</l>
+<l>ValidationPercent := 15</l>
+<c>* </c>
+<c>* Image dimensions the images are rescaled to during preprocessing.</c>
+<l>ImageWidth := 300</l>
+<l>ImageHeight := 300</l>
+<l>ImageNumChannels := 3</l>
+<c>* </c>
+<c>* Further parameters for image preprocessing.</c>
+<l>NormalizationType := 'none'</l>
+<l>DomainHandling := 'full_domain'</l>
+<c>* </c>
+<c>* In order to get a reproducible split we set a random seed.</c>
+<c>* This means that re-running the script results in the same split of DLDataset.</c>
+<l>SeedRand := 42</l>
+<c>* </c>
+<c>* *****************************************************************************</c>
+<c>* **   Read the labeled data and split it into train, validation and test   ***</c>
+<c>* *****************************************************************************</c>
+<c>* </c>
+<c>* Set the random seed.</c>
+<l>set_system ('seed_rand', SeedRand)</l>
+<c>* </c>
+<c>* Read the dataset with the procedure read_dl_dataset_classification.</c>
+<c>* Alternatively, you can read a DLDataset dictionary</c>
+<c>* as created by e.g., the MVTec Deep Learning Tool using read_dict().</c>
+<l>read_dl_dataset_classification (RawImageBaseFolder, LabelSource, DLDataset)</l>
+<c>* Generate the split.</c>
+<l>split_dl_dataset (DLDataset, TrainingPercent, ValidationPercent, [])</l>
+<c>* </c>
+<c>*</c>
+<c></c>
+<c>*===（2）===</c>
+<c>*Todo: check whether the data have be copyed</c>
+<l>TargetDir := 'D:/halcon-examples/halcon-data-copy/finetuned-resnet50-keras-data'</l>
+<l>TrainDir := TargetDir + '/data/train'</l>
+<l>ValidDir := TargetDir + '/data/validation'</l>
+<l>TestDir := TargetDir + '/data/test'</l>
+<l>DataDirAll := [TrainDir, ValidDir, TestDir]</l>
+<c></c>
+<l>DateTypeAll := ['train', 'validation', 'test']</l>
+<c></c>
+<l>get_dict_param (DLDataset, 'key_data_type', 'samples', SamplesKeyDataType)</l>
+<l>get_dict_tuple (DLDataset, 'image_dir', ImageDirHead)</l>
+<l>get_dict_tuple (DLDataset, 'samples', SamplesTupleCopy)</l>
+<l>NumSamples := |SamplesTupleCopy|</l>
+<l>for Index := 0 to NumSamples -1 by 1</l>
+<l>    get_dict_tuple (SamplesTupleCopy[Index], 'split', DataType)</l>
+<l>    tuple_find_first (DateTypeAll, DataType, DateTypeIndex)</l>
+<l>    get_dict_tuple (SamplesTupleCopy[Index], 'image_file_name', ImageFileName)</l>
+<l>    SourceFile := ImageDirHead + '/' + ImageFileName</l>
+<l>    ImageFileNameSplit := split(ImageFileName, '/')</l>
+<l>    NewImageFileName := ImageFileNameSplit[|ImageFileNameSplit|-1]</l>
+<c>    *Todo: how to index last tuple ememnt, like python -1</c>
+<l>    DestinationFile := DataDirAll[DateTypeIndex] + '/' + NewImageFileName</l>
+<l>    *read_image (Image, SourceFile)</l>
+<l>    *write_image (Image, 'tiff', 0, DestinationFile)</l>
+<l>    copy_file (SourceFile, DestinationFile)</l>
+<l>endfor</l>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
